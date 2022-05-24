@@ -8,7 +8,7 @@ from torch.nn import init
 import numpy as np
 
 
-def get_upsample_weight(in_channels, out_channels, kernel_size):  # 上采样权重提取
+def get_upsample_weight(in_channels, out_channels, kernel_size):  # Up-sampling weight extraction
     '''
     make a 2D bilinear kernel suitable for upsampling
     '''
