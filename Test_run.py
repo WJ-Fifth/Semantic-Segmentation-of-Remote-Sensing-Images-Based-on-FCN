@@ -33,13 +33,13 @@ best_test_loss = np.inf
 pretrained = 'reload'
 use_cuda = torch.cuda.is_available()
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-data_path = os.path.expanduser('data/')
+data_path = os.path.expanduser('E:/FCN_Code/data/')
 # vgg16 Model Calling
 vgg_model = models.VGGNet(requires_grad=True, pretrained=False)
 # FCN8s Model Calling
 fcn_model = models.FCN8s(pretrained_net=vgg_model, n_class=n_class)
 
-fcn_model.load_state_dict(torch.load('model/model30.pth'))  # 上次训练的参数
+fcn_model.load_state_dict(torch.load('E:/FCN_Code/model/model30.pth'))  # 上次训练的参数
 
 if use_cuda:
     fcn_model.cuda()

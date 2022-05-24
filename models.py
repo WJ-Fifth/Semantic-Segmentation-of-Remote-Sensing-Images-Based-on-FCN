@@ -110,8 +110,10 @@ class FCN8s(nn.Module):
         self.bn5 = nn.BatchNorm2d(32)
         self.classifier = nn.Conv2d(32, n_class, kernel_size=1)
 
-        # 1 对网络的参数进行初始化: 使得每一层输出的方差应该尽量相等
-        init.xavier_uniform_(self.deconv1.weight)  # 均匀分布 ~ U(−a,a)
+        # 1 Initialize the parameters of the network
+        # so that the variances of the output of each layer should be as equal as possible
+
+        init.xavier_uniform_(self.deconv1.weight)  # Uniform distribution ~ U(−a,a)
         # 2
         init.xavier_uniform_(self.deconv2.weight)
         # 3
@@ -191,7 +193,7 @@ class VGGNet(VGG):
 
         if pretrained:
             vgg16 = models.vgg16(pretrained=False)
-            vgg16.load_state_dict(torch.load('./vgg16-397923af.pth'))  # Pre-training dataset
+            vgg16.load_state_dict(torch.load('E:/FCN_Code/model/vgg16-397923af.pth'))  # Pre-training dataset
             # print("vgg16\n", vgg16)
             #
             # modified_features = nn.Sequential(*list(vgg16.features.children())[:-1])
@@ -257,6 +259,7 @@ class VGGNet(VGG):
 # testing code
 if __name__ == "__main__":
     net = VGGNet()
-    input_img = torch.ones((1, 3, 256, 256))
-    out = net(input_img)
-    print(out)
+    # input_img = torch.ones((1, 3, 256, 256))
+    # out = net(input_img)
+    # print(net)
+    print(FCN8s(net, n_class=6))
