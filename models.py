@@ -193,7 +193,7 @@ class VGGNet(VGG):
 
         if pretrained:
             vgg16 = models.vgg16(pretrained=False)
-            vgg16.load_state_dict(torch.load('E:/FCN_Code/model/vgg16-397923af.pth'))  # Pre-training dataset
+            vgg16.load_state_dict(torch.load('./model/vgg16-397923af.pth'))  # Pre-training dataset
             # print("vgg16\n", vgg16)
             #
             # modified_features = nn.Sequential(*list(vgg16.features.children())[:-1])

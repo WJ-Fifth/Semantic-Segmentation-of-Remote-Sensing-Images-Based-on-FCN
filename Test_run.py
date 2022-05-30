@@ -33,13 +33,13 @@ best_test_loss = np.inf
 pretrained = 'reload'
 use_cuda = torch.cuda.is_available()
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-data_path = os.path.expanduser('E:/FCN_Code/data/')
+data_path = os.path.expanduser('./data/')
 # vgg16 Model Calling
 vgg_model = models.VGGNet(requires_grad=True, pretrained=False)
 # FCN8s Model Calling
 fcn_model = models.FCN8s(pretrained_net=vgg_model, n_class=n_class)
 
-fcn_model.load_state_dict(torch.load('E:/FCN_Code/model/model30.pth'))  # 上次训练的参数
+fcn_model.load_state_dict(torch.load('./model/model100.pth'))  # 上次训练的参数
 
 if use_cuda:
     fcn_model.cuda()
@@ -50,7 +50,7 @@ criterion = loss.FocalLoss()
 optimizer = Adam(fcn_model.parameters())
 
 
-def Test(epoch):
+def Test(epoch, test_loader):
     fcn_model.eval()
     total_loss = 0.0
     for batch_idx, (imgs, labels) in enumerate(test_loader):
@@ -84,18 +84,11 @@ def Test(epoch):
 
     total_loss /= len(test_loader)
 
-    with open(test_file, "a+") as file:
-        file.write('%.3f' % total_loss + '\n')
-        file.close()
+
 
     print()
-    print('test epoch  [%d/%d] average_loss %.5f' % (epoch + 1, epoch_num, total_loss))
+    print('average_loss %.5f' % (total_loss))
     # print('test epoch [%d/%d]: ' % (epoch + 1, epoch_num))
-    global best_test_loss
-    if best_test_loss > total_loss:
-        best_test_loss = total_loss
-        print('the best loss!')
-        # fcn_model.save('SBD.pth')
 
     b, _, h, w = out.size()
     pred = out.permute(0, 2, 3, 1).contiguous().view(-1, n_class).max(1)[1].view(b, h, w)
@@ -117,13 +110,8 @@ def Test(epoch):
     acc = acc * 100
     mean_iu = mean_iu * 100
     print('Acc = %.2f' % acc, '% ', 'MIoU = %.2f' % mean_iu, '%')
-    with open(Acc_file, "a+") as file:
-        file.write('%.2f' % acc + '\n')
-        file.close()
 
-    with open(MIoU_file, "a+") as file:
-        file.write('%.2f' % mean_iu + '\n')
-        file.close()
+    # torch.save(fcn_model.state_dict(), './model/model100.pth')
 
 
 if __name__ == '__main__':
@@ -135,5 +123,5 @@ if __name__ == '__main__':
 
     if hasattr(torch.cuda, 'empty_cache'):
         torch.cuda.empty_cache()
-    print("training start")
-    Test(30)
+    print("testing start")
+    Test(0, test_loader)

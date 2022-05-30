@@ -1,25 +1,35 @@
-基于FCN的遥感影像识别
+Remote sensing image recognition based on FCN
 
-因数据集较小，首先对数据集进行分割，并且以VOC数据集格式存储。
+Due to the small dataset, the dataset is first segmented and stored in VOC dataset format.
 
-图像边缘提取算法拟使用Canny算法，但未实现代码。
+The image edge extraction algorithm is proposed to use Canny algorithm.
 
-train.py ：训练集对模型进行训练的文件，并将训练后的模型参数保存到model文件夹下的pth文件中。
+**main.py: Using to test with integrated test code and prediction code. The test section holds 44 sheets of clipped data and labels that can be used to test model performance. The prediction code can be used to predict the labels of 88 cropped images.**
 
-predict.py：调用训练集训练后的模型，通过对测试集三张图片分割后的图片进行像素预测，得到预测结果图集。
+**The results can be obtained by running main() directly; because more datasets cannot be uploaded, only a small number of datasets are used for testing, and the accuracy obtained deviates from MIoU to some extent, but the difference is not large.**
 
-models.py：包含对VGG16模型，FCN-8s模型的定义，并通过与训练ImageNet数据集，实现迁移学习。
 
-voc_loader.py：将分割后的训练集和测试集图片以及标签以VOC数据集格式存储。
 
-opencv_cut_picture.py：将训练集以及测试集图片进行等比例分割，训练集分割成507张图片，测试集分割成222张图片。（包括标签）
+train.py : The file for training the model on the training set, and save the trained model parameters to the pth file under the model folder.
 
-tools.py：将预测结果从网络输出转换成图片（GitHub查找）
+predict.py: call the model trained by the training set, and get the prediction result atlas by pixel prediction of the three images segmented in the test set.
 
-loss.py：facel loss损失函数实现，代替原本的交叉熵损失函数，解决样本不均衡问题。
+models.py: contains the definition of VGG16 model, FCN-8s model, and migration learning by training with the ImageNet dataset.
 
-Sobel.py：图像边缘提取算法针对物体边界部分进行分类，以提高图像分割的准确性。
+voc_loader.py: store the segmented training set and test set images and labels in VOC dataset format.
 
-VOC2012：分割后并且以VOC数据集格式整理后的数据集。
+cut_pic.py: split the training set as well as the test set images in equal proportion. (including labels)
 
-result：测试集预测结果（因文件过大，单独发送）
+opencv_cut_picture.py: Merge images
+
+tools.py: convert prediction results from network output to images (GitHub lookup)
+
+loss.py: focal loss function implementation, instead of the original cross-entropy loss function, to solve the sample imbalance problem.
+
+edge_detection.py: image edge extraction algorithm for object boundary part for classification to improve the accuracy of image segmentation.
+
+VOC2012: the segmented and organized dataset in VOC dataset format.
+
+result: test set prediction results
+
+Complete dataset download link: https://x-ytong.github.io/project/GID.html

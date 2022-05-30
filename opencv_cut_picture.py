@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-# 从文件夹读入图片
+# Read in images from a folder
 def readpicture(path, number, type):
     my_path = path + str(number) + str(type)
     print(my_path)
@@ -81,6 +81,7 @@ def montage_picture(read_path, save_path, s1, s2, s3, start, end, s, s5, s6):
     print("After traversal")
     img = cv2.resize(image_zoom, (s5, s6))
     cv2.imwrite(save_path + type_mask, img)
+    # cv2.imshow("label_image", img)
 
 '''
 The parameters are, in order, read image address, segmentation result storage address, segmentation size
@@ -93,13 +94,13 @@ and the size of the original image (2).
 if __name__ == '__main__':
 
     # image data path
-    path = "E:/FCN_Code/fcn_pytorch/data/output/"
-    save_path = "E:/FCN_Code/fcn_pytorch/data/ori/"
+    path = "./data/output/"
+    save_path = "./data/ori/"
 
     # cut_picture: Implementing segmentation of dataset images
     # cut_picture(path, save_path, 640)
 
-    montage_picture(path, save_path, 7680, 7040, 3, 0, 109, 640, 7300, 6908)
-    # montage_picture(path, save_path, 5760, 5760, 3, 81, 161, 640, 5204, 5190)
+    # montage_picture(path, save_path, 7680, 7040, 3, 0, 109, 640, 7300, 6908)
+    montage_picture(path, save_path, 7680, 7040, 3, 0, 109, 640, 7200, 6800)
 
 

@@ -10,18 +10,21 @@ from matplotlib import pyplot as plt
 
 
 class VOCClassSegBase(data.Dataset):
-    # 提供的标签分为6类，分别为建筑（标记1）、农场（标记2）、森林（标记3）、绿地（标记4）、水域（标记5）以及其他（标记0）
+    """
+    The tags provided are divided into six categories:
+    buildings (tag 1), farms (tag 2), forests (tag 3), green spaces (tag 4), waters (tag 5), and others (tag 0)
+    """
 
     class_names = np.array(['other', 'built_up', 'farmland', 'forest', 'meadow', 'water'])
-    mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])  # subtract mean  减去均值
+    mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])  # subtract mean
 
     def __init__(self, root, split='train', transform=True):
         self.root = root
         self.split = split
         self._transform = transform
 
-        dataset_dir = osp.join(self.root)  # 合并VOC2012数据集路径
-        # dataset_dir = osp.join(self.root, 'Large-scale Classification_5classes/')  # 合并VOC2012数据集路径
+        dataset_dir = osp.join(self.root)  # Merge VOC2012 dataset paths
+        # dataset_dir = osp.join(self.root, 'Large-scale Classification_5classes/')
         self.files = collections.defaultdict(list)
         if self.split == 'train':
             # for split_file in ['train', 'val']:
@@ -29,7 +32,9 @@ class VOCClassSegBase(data.Dataset):
                 imgsets_file = osp.join(dataset_dir, '%s.txt' % split_file)  # ImageSets train.txt
                 for img_name in open(imgsets_file):
                     img_name = img_name.strip()
-                    img_file = osp.join(dataset_dir, 'img', img_name)  # 提供的是VOC所提供的所有的图片信息，包括训练图片
+                    img_file = osp.join(dataset_dir, 'img', img_name)
+                    # Provided is all the image information provided by the VOC, including training images
+
                     lbl_file = img_file.replace('img', 'label')
                     self.files[split_file].append({'img': img_file, 'lbl': lbl_file})
 
@@ -39,7 +44,9 @@ class VOCClassSegBase(data.Dataset):
                 imgsets_file = osp.join(dataset_dir, '%s.txt' % split_file)  # ImageSets test.txt
                 for img_name in open(imgsets_file):
                     img_name = img_name.strip()
-                    img_file = osp.join(dataset_dir, 'img', img_name)  # 提供的是VOC所提供的所有的图片信息，包括训练图片
+                    img_file = osp.join(dataset_dir, 'img', img_name)
+                    # Provided is all the image information provided by the VOC, including training images
+
                     lbl_file = img_file.replace('img', 'label')
                     self.files[split_file].append({'img': img_file, 'lbl': lbl_file})
 
@@ -55,10 +62,9 @@ class VOCClassSegBase(data.Dataset):
     def __len__(self):
         return len(self.files[self.split])
 
-    def __getitem__(self, index):  # 迭代器
+    def __getitem__(self, index):  # Iterators
 
-        # print('getitem方法被调用')
-        data_file = self.files[self.split][index]  # 数据
+        data_file = self.files[self.split][index]
         # load image
 
         img_file = data_file['img']
@@ -110,7 +116,7 @@ class VOCClassSegBase(data.Dataset):
         img = img.astype(np.float64)
         # img -= self.mean_bgr
         img = img / 255.
-        img = img.transpose(2, 0, 1)  # whc -> cwh 表示矩阵XYZ轴发生变换
+        img = img.transpose(2, 0, 1)  # whc -> cwh indicates that the matrix XYZ axis is transformed
         img = torch.from_numpy(img).float()
         lbl = torch.from_numpy(lbl).long()
         return img, lbl
@@ -133,9 +139,9 @@ class VOCClassSegBase(data.Dataset):
         img = img[:, :, ::-1]  # BGR -> RGB
         return img
 
-    def randomFlip(self, img, label):  # 随机反转
-        if random.random() < 0.5:  # 伪随机50%的概率进行反转
-            img = np.fliplr(img)  # 实现numpy数组的随机反转
+    def randomFlip(self, img, label):  # Random inversion
+        if random.random() < 0.5:  # Pseudo-random 50% probability of inversion
+            img = np.fliplr(img)  # Implement random inversion of numpy arrays
             label = np.fliplr(label)
         return img, label
 
@@ -155,16 +161,22 @@ class VOCClassSegBase(data.Dataset):
         img = cv2.resize(img, (s, s), interpolation=cv2.INTER_LINEAR)
         return img
 
-    def randomCrop(self, img, label):  # 随机裁剪
-        h, w, _ = img.shape  # 读取图片高度和宽度信息
-        short_size = min(w, h)  # 取高度和宽度中的较小值
+    def randomCrop(self, img, label):
+        """
+        Random cropping
+        """
+        h, w, _ = img.shape
+        short_size = min(w, h)  # Take the smaller of the height and width
         rand_size = random.randrange(int(0.7 * short_size), short_size)
         x = random.randrange(0, w - rand_size)
         y = random.randrange(0, h - rand_size)
 
         return img[y:y + rand_size, x:x + rand_size], label[y:y + rand_size, x:x + rand_size]
 
-    def predict_randomCrop(self, img):  # 随机裁剪预测图像
+    def predict_randomCrop(self, img):
+        '''
+
+        '''
         h, w, _ = img.shape
         short_size = min(w, h)
         rand_size = random.randrange(int(0.7 * short_size), short_size)

@@ -47,7 +47,6 @@ class up_conv(nn.Module):
 
 class U_Net(nn.Module):
 
-
     def __init__(self, in_ch=3, out_ch=1):
         super(U_Net, self).__init__()
 

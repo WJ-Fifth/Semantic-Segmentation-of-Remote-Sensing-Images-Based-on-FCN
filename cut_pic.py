@@ -24,9 +24,9 @@ def fen_ge(img_path, save_txt_path):
                     continue
                 save_img = img[i:min(i + width, img.shape[0]), j:min(j + height, img.shape[1]), :]
                 if 'label' in img_path:
-                    save_path = os.path.join('E:/FCN_Code/data/label', os.path.basename(img_path))
+                    save_path = os.path.join('./data/label', os.path.basename(img_path))
                 else:
-                    save_path = os.path.join('E:/FCN_Code/data/img', os.path.basename(img_path))
+                    save_path = os.path.join('./data/img', os.path.basename(img_path))
 
                 save_path = save_path.replace('_label', '')
 
@@ -57,7 +57,7 @@ def fen_ge_predict(img_path, save_txt_path):
                     continue
                 save_img = img[i:min(i + width, img.shape[0]), j:min(j + height, img.shape[1]), :]
 
-                save_path = os.path.join('E:/FCN_Code/data/img_predict', os.path.basename(img_path))
+                save_path = os.path.join('./data/img_predict', os.path.basename(img_path))
 
                 save_path = save_path + "_" + str(i) + "_" + str(j) + ".png"
                 if '_label' not in img_path:
@@ -67,16 +67,16 @@ def fen_ge_predict(img_path, save_txt_path):
     print(img_list)
 
 
-if not os.path.exists('E:/FCN_Code/data/img/'):
-    os.makedirs('E:/FCN_Code/data/img')
-if not os.path.exists('E:/FCN_Code/data/label/'):
-    os.makedirs('E:/FCN_Code/data/label')
+if not os.path.exists('./data/img/'):
+    os.makedirs('./data/img')
+if not os.path.exists('./data/label/'):
+    os.makedirs('./data/label')
 
 
 if __name__ == '__main__':
-    # fen_ge('E:/FCN_Code/data/train_ori/*.tif', 'E:/FCN_Code/data/train.txt')
-    # fen_ge('E:/FCN_Code/data/val_ori/*.tif', 'E:/FCN_Code/data/val.txt')
-    fen_ge('E:/FCN_Code/data/test_ori/*.tif', 'E:/FCN_Code/data/test.txt')
-    # fen_ge('E:/FCN_Code/data/test_val_ori/*.tif', 'data/test_val.txt')
+    # fen_ge('./train_ori/*.tif', './data/train.txt')
+    # fen_ge('./val_ori/*.tif', './data/val.txt')
+    fen_ge('./data/test_ori/*.tif', './data/test.txt')
+    # fen_ge('./data/test_val_ori/*.tif', './data/test_val.txt')
     # fen_ge_predict('data/predict_ori/*.tif', 'data/predict.txt')
     print("finish")

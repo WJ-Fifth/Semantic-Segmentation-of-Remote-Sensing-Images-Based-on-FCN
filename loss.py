@@ -5,6 +5,10 @@ from torch.autograd import Variable
 
 
 class FocalLoss(nn.Module):
+    '''
+    Focal loss solves the category imbalance problem,
+    update a new loss function
+    '''
     def __init__(self, gamma=0, alpha=None, size_average=True):
         super(FocalLoss, self).__init__()
         self.gamma = gamma

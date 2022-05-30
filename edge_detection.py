@@ -29,6 +29,7 @@ def Edge_detection(path, save_path, number):
     edge2 = cv2.bitwise_and(img, img, mask=edge1)
     # cv2.imshow("bitwise_and", edge2)
     save_path1 = save_path + "%d_edge_canny.png" % number
+    edge2 = edge2 + img
     cv2.imwrite(save_path1, edge2)
 
 
@@ -39,4 +40,5 @@ if __name__ == "__main__":
         path = "E:/FCN_Code/data/detection/"
         save_path = "E:/FCN_Code/data/detection/edge/"
         Edge_detection(path, save_path, i)
+        break
     print("Edge extraction completed")

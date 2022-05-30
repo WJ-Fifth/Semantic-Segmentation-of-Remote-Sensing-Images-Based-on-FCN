@@ -40,7 +40,7 @@ use_cuda = torch.cuda.is_available()
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 data_path = os.path.expanduser('data/')
 # vgg16 Model Calling
-vgg_model = models.VGGNet(requires_grad=True, pretrained=False)
+vgg_model = models.VGGNet(requires_grad=True, pretrained=True)
 # FCN8s Model Calling
 fcn_model = models.FCN8s(pretrained_net=vgg_model, n_class=n_class)
 

@@ -47,6 +47,7 @@ def labelTopng(label, img_name):
     label = label.numpy()  # 640 640
     label_pil = colorize_mask(label)
     label_pil.save(img_name)
+    # return label_pil
 
 
 def labelToimg(label):
