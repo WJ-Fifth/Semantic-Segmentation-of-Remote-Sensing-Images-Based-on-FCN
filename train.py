@@ -1,19 +1,23 @@
 import os
 import time
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+
 import torch
 from torch.autograd import Variable
 import torch.utils.data.dataloader
 import numpy as np
 import MIoU
+from loss import loss
+# from main import parse_args
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
-
+# arg = parse_args()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# criterion = loss.FocalLoss()
-criterion = torch.nn.CrossEntropyLoss()
+loss_dir = {'cross entropy': torch.nn.CrossEntropyLoss(),
+            'Focal loss': loss.FocalLoss()}
+
+criterion = loss_dir['Focal loss']
 
 train_loss = []
 val_loss = []
@@ -42,7 +46,6 @@ def train(args, model, optimizer, dataloaders, num_classes):
         iter_time = time.time()
 
         for batch_idx, (imgs, labels) in enumerate(train_loader):
-
             imgs_tensor = Variable(imgs.to(device))
             labels_tensor = Variable(labels.to(device))
             out = model(imgs_tensor)
@@ -71,6 +74,9 @@ def train(args, model, optimizer, dataloaders, num_classes):
               % (epoch + 1, args.epochs, total_loss, time.time() - iter_time))
 
         acc, miou = evaluate(args, model, val_loader, num_classes)
+
+        print('\nAcc = %.2f' % acc, '% ', 'MIoU = %.2f' % miou, '%')
+
         if miou > best_miou:
             best_miou = miou
             torch.save(
@@ -78,7 +84,8 @@ def train(args, model, optimizer, dataloaders, num_classes):
                     'epoch': epoch,
                     'state_dict': model.state_dict(),
                     'optimizer': optimizer.state_dict()
-                }, './{}_checkpoint.pth'.format(args.exp_id))
+                }, './checkpoints/{}_checkpoint.pth'.format(args.exp_id))
+            print("The best model is saved!")
 
     np.save("./train_loss.npy", train_loss)
     np.save("./val_loss.npy", val_loss)
@@ -88,8 +95,8 @@ def train(args, model, optimizer, dataloaders, num_classes):
 
 def evaluate(args, model, val_loader, num_classes):
     total_loss = torch.tensor([0.0]).to(device)
-    # total_count = torch.tensor([0.0]).to(device)
-    # correct_count = torch.tensor([0.0]).to(device)
+    total_count = torch.tensor([0.0]).to(device)
+    correct_count = torch.tensor([0.0]).to(device)
 
     model.eval()
 
@@ -129,8 +136,6 @@ def evaluate(args, model, val_loader, num_classes):
     val_loss.append(total_loss)
     val_acc.append(acc)
     val_miou.append(mean_iu)
-
-    print('Acc = %.2f' % acc, '% ', 'MIoU = %.2f' % mean_iu, '%')
 
     return acc, mean_iu
 

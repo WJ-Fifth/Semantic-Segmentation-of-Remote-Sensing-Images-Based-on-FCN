@@ -4,7 +4,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import torch
 from torch.autograd import Variable
-from dataset import voc_loader
+from dataloaders import GID_loader
 from model import models
 from Toolkit import tools
 

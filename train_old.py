@@ -5,7 +5,7 @@ from torch.autograd import Variable
 import torch.utils.data.dataloader
 import numpy as np
 from model import models
-from dataset import voc_loader
+from dataloaders import GID_loader
 from loss import loss
 from torch.optim import Adam
 import MIoU

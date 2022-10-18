@@ -1,8 +1,10 @@
 import argparse
 import torch
-from dataset import LoveDa_loader
-from model import fcn_resnet, models
+from dataloaders import LoveDa_loader, GID_loader
+from model import fcn_resnet, models, swin, FCNformer
 from train import train, resume, evaluate
+from torch.utils.data import DataLoader
+
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -15,10 +17,10 @@ def parse_args():
                         help='with/without using dynamic filters')
 
     parser.add_argument('--dataset', type=str, default='LoveDa',
-                        help='select dataset with GID, LoveDa etc.')
+                        help='select dataloaders with GID, LoveDa etc.')
 
     parser.add_argument('--data_path', type=str, default='D:/data/LoveDA',
-                        help='select dataset path with GID, LoveDa etc.')
+                        help='select dataloaders path with GID, LoveDa etc.')
 
     parser.add_argument('--resume', type=int, default=0,
                         help='resume the trained model')
@@ -47,23 +49,40 @@ if __name__ == '__main__':
 
     # dataloaders
     print('data loading....')
-    num_classes = 0
 
     if args.dataset == 'LoveDa':
         train_set = LoveDa_loader.LoveDaSeg(root=args.data_path, split='Train', transform=True)
         val_set = LoveDa_loader.LoveDaSeg(root=args.data_path, split='Val', transform=True)
 
-        train_loader = torch.utils.data.DataLoader(train_set, batch_size=args.batch_size,
-                                                   shuffle=True, num_workers=0)
-        print("train data load success")
+        train_loader = DataLoader(train_set, batch_size=args.batch_size,
+                                  shuffle=True, num_workers=0)
+        print("LoveDa train data load success")
 
-        val_loader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size,
-                                                 shuffle=False, num_workers=0)
-        print("val data load success")
-    CLASSES = ('Background', 'Building', 'Road',
-               'Water', 'Barren', 'Forest', 'Agricultural')
+        val_loader = DataLoader(val_set, batch_size=args.batch_size,
+                                shuffle=False, num_workers=0)
+        print("LoveDa val data load success")
 
-    num_classes = 7
+    elif args.dataset == 'GID-5':
+        train_set = GID_loader.VOCClassSegBase(root=args.data_path, split='Train', transform=True)
+        val_set = GID_loader.VOCClassSegBase(root=args.data_path, split='Val', transform=True)
+
+        train_loader = DataLoader(train_set, batch_size=args.batch_size,
+                                  shuffle=True, num_workers=0)
+        print("GID-5 train data load success")
+
+        val_loader = DataLoader(val_set, batch_size=args.batch_size,
+                                shuffle=False, num_workers=0)
+        print("GID-5 val data load success")
+
+    else:
+        train_loader = val_loader = None
+        NotImplementedError
+
+    dataset_dir = {'LoveDa': ('Background', 'Building', 'Road',
+                              'Water', 'Barren', 'Forest', 'Agricultural'),
+                   'GID-5': ('other', 'built_up', 'farmland', 'forest', 'meadow', 'water')}
+
+    num_classes = len(dataset_dir[args.dataset])
 
     dataloaders = (train_loader, val_loader)
 
@@ -72,7 +91,7 @@ if __name__ == '__main__':
         resnet = fcn_resnet.RESNET().to(device)
         model = fcn_resnet.FCN8s(pretrained_net=resnet, n_class=num_classes, backbone='resnet50').to(device)
 
-        print("The model is defined")
+        print("The FCN ResNet model is defined")
 
     elif args.model == 'fcn_vgg':
         # vgg16 Model Calling
@@ -80,6 +99,14 @@ if __name__ == '__main__':
         # FCN8s Model Calling
         model = models.FCN8s(pretrained_net=vgg_model, n_class=num_classes).to(device)
         print("The model is defined")
+
+    elif args.model == 'FCNformer':
+        backbone = swin.swin_t()
+        model = FCNformer.FCN8s(pretrained_net=backbone, n_class=num_classes, backbone='swin-T')
+
+    else:
+        model = None
+        NotImplementedError
     # optimizer
     optimizer = torch.optim.Adam(
         model.parameters(), lr=args.lr, betas=(0.9, 0.999))

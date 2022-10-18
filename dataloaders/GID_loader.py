@@ -33,7 +33,7 @@ class VOCClassSegBase(data.Dataset):
         self.split = split
         self._transform = transform
 
-        dataset_dir = os.path.join(self.root)  # Merge VOC2012 dataset paths
+        dataset_dir = os.path.join(self.root)  # Merge VOC2012 dataloaders paths
         # dataset_dir = osp.join(self.root, 'Large-scale Classification_5classes/')
         self.files = collections.defaultdict(list)
         if self.split == 'train':

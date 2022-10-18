@@ -1,6 +1,6 @@
 import predict
 import matplotlib.pyplot as plt
-from dataset import voc_loader
+from dataloaders import GID_loader
 import torch
 from Test_run import Test
 import os

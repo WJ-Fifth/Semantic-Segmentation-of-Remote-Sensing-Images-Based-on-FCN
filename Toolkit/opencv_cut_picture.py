@@ -97,7 +97,7 @@ if __name__ == '__main__':
     path = "E:/FCN_Code/GID5/val_data/"
     save_path = "E:/FCN_Code/GID-5/img/"
 
-    # cut_picture: Implementing segmentation of dataset images
+    # cut_picture: Implementing segmentation of dataloaders images
     cut_picture(path, save_path, 1024)
 
     # montage_picture(path, save_path, 7680, 7040, 3, 0, 109, 640, 7300, 6908)
