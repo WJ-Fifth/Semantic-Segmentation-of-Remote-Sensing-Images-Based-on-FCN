@@ -11,29 +11,29 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--exp_id', type=str, default='exp_fcn_resnet')
+    parser.add_argument('--exp_id', type=str, default='FCNformer_GID')
 
-    parser.add_argument('--model', type=str, default='fcn_vgg',
-                        help='with/without using dynamic filters')
+    parser.add_argument('--model', type=str, default='FCNformer',
+                        help='FCNformer & fcn_resnet & fcn_vgg')
 
-    parser.add_argument('--dataset', type=str, default='LoveDa',
-                        help='select dataloaders with GID, LoveDa etc.')
+    parser.add_argument('--dataset', type=str, default='GID-5',
+                        help='select dataloaders with GID-5, LoveDa etc.')
 
-    parser.add_argument('--data_path', type=str, default='D:/data/LoveDA',
+    parser.add_argument('--data_path', type=str, default='./data/GID-5',
                         help='select dataloaders path with GID, LoveDa etc.')
 
-    parser.add_argument('--resume', type=int, default=0,
+    parser.add_argument('--resume', type=int, default=1,
                         help='resume the trained model')
-    parser.add_argument('--test', type=int, default=0,
+    parser.add_argument('--test', type=int, default=1,
                         help='test with trained model')
 
-    parser.add_argument('--epochs', type=int, default=12,
+    parser.add_argument('--epochs', type=int, default=10,
                         help='number of training epochs')
 
-    parser.add_argument('--batch_size', type=int, default=4)
+    parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--lr', type=float, default=1e-3, help='learning rate')
 
-    parser.add_argument('--loss', type=str, default='focal_loss', help='loss function')
+    parser.add_argument('--loss', type=str, default='Dice loss', help='loss function')
 
     parser.add_argument('--seed', type=int, default=1, help='random seed')
 
@@ -63,8 +63,8 @@ if __name__ == '__main__':
         print("LoveDa val data load success")
 
     elif args.dataset == 'GID-5':
-        train_set = GID_loader.VOCClassSegBase(root=args.data_path, split='Train', transform=True)
-        val_set = GID_loader.VOCClassSegBase(root=args.data_path, split='Val', transform=True)
+        train_set = GID_loader.VOC2012ClassSeg(root=args.data_path, split='train', transform=True)
+        val_set = GID_loader.VOC2012ClassSeg(root=args.data_path, split='val', transform=True)
 
         train_loader = DataLoader(train_set, batch_size=args.batch_size,
                                   shuffle=True, num_workers=0)
@@ -88,28 +88,30 @@ if __name__ == '__main__':
 
     # network
     if args.model == 'fcn_resnet':
-        resnet = fcn_resnet.RESNET().to(device)
+        resnet = fcn_resnet.RESNET(pretrained=True, requires_grad=False).to(device)
         model = fcn_resnet.FCN8s(pretrained_net=resnet, n_class=num_classes, backbone='resnet50').to(device)
 
         print("The FCN ResNet model is defined")
 
     elif args.model == 'fcn_vgg':
         # vgg16 Model Calling
-        vgg_model = models.VGGNet(requires_grad=True, pretrained=True).to(device)
+        vgg_model = models.VGGNet(requires_grad=False, pretrained=True).to(device)
         # FCN8s Model Calling
         model = models.FCN8s(pretrained_net=vgg_model, n_class=num_classes).to(device)
         print("The model is defined")
 
     elif args.model == 'FCNformer':
-        backbone = swin.swin_t()
+        backbone = FCNformer.Swin_T(prdtrained=True, requires_grad=True)
         model = FCNformer.FCN8s(pretrained_net=backbone, n_class=num_classes, backbone='swin-T')
+        model = model.to(device)
 
     else:
         model = None
         NotImplementedError
     # optimizer
-    optimizer = torch.optim.Adam(
-        model.parameters(), lr=args.lr, betas=(0.9, 0.999))
+    # optimizer = torch.optim.Adam(
+    #     model.parameters(), lr=args.lr, betas=(0.9, 0.999))
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
 
     # resume the trained model
     if args.resume:
@@ -120,3 +122,4 @@ if __name__ == '__main__':
     else:  # train mode, train the network from scratch
         train(args, model, optimizer, dataloaders, num_classes)
         print('training finished')
+

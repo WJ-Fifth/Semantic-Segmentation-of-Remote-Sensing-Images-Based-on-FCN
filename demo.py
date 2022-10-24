@@ -61,7 +61,7 @@ def platform(title, line_num=2, epoch_num=100, label_name=False, file_names=None
 
 def main():
     batch_size = 32
-    test_data = voc_loader.VOC2012ClassSeg(root=data_path, split='test', transform=True)
+    test_data = GID_loader.VOC2012ClassSeg(root=data_path, split='test', transform=True)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=0)
     print("test data load success")
 
