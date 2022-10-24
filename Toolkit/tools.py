@@ -4,16 +4,23 @@ import PIL.Image as Image
 
 
 def getPalette():
-
     # GID label information of 5 classes:
-    pal = np.array([[0, 0, 0],                                  # other
-                    [255, 0, 0],                                # built-up Red
-                    [0, 255, 0],                                # farmland Green
-                    [0, 255, 255],                              # forest Cyan
-                    [255, 255, 0],                              # meadow Yellow
-                    [0, 0, 255]                                 # water Blue
-                    ], dtype='uint8').flatten()
-    return pal
+    pal_GID = np.array([[0, 0, 0],  # other
+                        [255, 0, 0],  # built-up Red
+                        [0, 255, 0],  # farmland Green
+                        [0, 255, 255],  # forest Cyan
+                        [255, 255, 0],  # meadow Yellow
+                        [0, 0, 255]  # water Blue
+                        ], dtype='uint8').flatten()
+
+    pal_LoveDa = np.array([[255, 255, 255],
+                           [255, 0, 0],
+                           [255, 255, 0],
+                           [0, 0, 255],
+                           [159, 129, 183],
+                           [0, 255, 0],
+                           [255, 195, 128]], dtype='uint8').flatten()
+    return pal_LoveDa
 
 
 def colorize_mask(mask):

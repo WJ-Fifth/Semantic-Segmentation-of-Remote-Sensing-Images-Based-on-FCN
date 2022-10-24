@@ -53,14 +53,14 @@ def predict_randomFlip(img):
     return img
 
 
-def resize(img, label, s=640):  # s=640
+def resize(img, label, s=224):  # s=640
     # print(s, img.shape)
     img = cv2.resize(img, (s, s), interpolation=cv2.INTER_LINEAR)
     label = cv2.resize(label, (s, s), interpolation=cv2.INTER_NEAREST)
     return img, label
 
 
-def predict_resize(img, s=640):  # s=640
+def predict_resize(img, s=224):  # s=640
     # print(s, img.shape)
     img = cv2.resize(img, (s, s), interpolation=cv2.INTER_LINEAR)
     return img

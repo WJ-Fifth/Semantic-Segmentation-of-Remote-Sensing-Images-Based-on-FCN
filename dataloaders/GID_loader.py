@@ -48,9 +48,9 @@ class VOCClassSegBase(data.Dataset):
                     label_file = img_file.replace('img', 'label')
                     self.files[split_file].append({'img': img_file, 'label': label_file})
 
-        if self.split == 'test':
+        if self.split == 'val':
             # for split_file in ['test', 'test_val']:
-            for split_file in ['test']:
+            for split_file in ['val']:
                 imgsets_file = os.path.join(dataset_dir, '%s.txt' % split_file)  # ImageSets test.txt
                 for img_name in open(imgsets_file):
                     img_name = img_name.strip()
@@ -65,14 +65,14 @@ class VOCClassSegBase(data.Dataset):
                 imgsets_file = os.path.join(dataset_dir, '%s.txt' % split_file)
                 for img_name in open(imgsets_file):
                     img_name = img_name.strip()
-                    img_file = os.path.join(dataset_dir, 'img_predict', img_name)
+                    img_file = os.path.join(dataset_dir, 'img', img_name)
                     self.files[split_file].append({'img': img_file})
 
     # 返回数据集长度
     def __len__(self):
         return len(self.files[self.split])
 
-    def __getitem__(self, index, palette=PALETTE):  # Iterators
+    def __getitem__(self, index):  # Iterators
 
         data_file = self.files[self.split][index]
         # load image
@@ -83,7 +83,7 @@ class VOCClassSegBase(data.Dataset):
         # print(img_file)
         # img = cv2.imread(img_file)
         img = np.array(img, dtype=np.uint8)
-        if self.split == 'train' or self.split == 'test':
+        if self.split == 'train' or self.split == 'val':
             # load label
             label_file = data_file['label']
             # label_file = "data/label/GF2_PMS1__L1A0000564539-MSS1.tif_0_3200.png"
@@ -92,20 +92,21 @@ class VOCClassSegBase(data.Dataset):
             label = np.array(label, dtype=np.uint8)
             label = label // 255 * [[[4, 2, 1]]]
             label = np.sum(label, axis=2, dtype=np.uint8)
-            palette = np.sum((palette // 255 * [[[4, 2, 1]]]), axis=2, dtype=np.uint8).reshape(-1)
+            # palette = np.sum((palette // 255 * [[[4, 2, 1]]]), axis=2, dtype=np.uint8).reshape(-1)
+            # print(palette)
             label_index = label.copy()
-            label[label_index == palette[0]] = 0  # [0, 0, 0]
-            label[label_index == palette[1]] = 1  # [255, 0, 0]
-            label[label_index == palette[2]] = 2  # [0, 255, 0]
-            label[label_index == palette[3]] = 3  # [0, 255, 255]
-            label[label_index == palette[4]] = 4  # [255, 255, 0]
-            label[label_index == palette[5]] = 5  # [0, 0, 255]
+
+            label[label_index == 7] = 0  # [0, 0, 0]
+            label[label_index == 4] = 1  # [255, 0, 0]
+            label[label_index == 2] = 2  # [0, 255, 0]
+            label[label_index == 3] = 3  # [0, 255, 255]
+            label[label_index == 6] = 4  # [255, 255, 0]
+            label[label_index == 1] = 5  # [0, 0, 255]
 
             img, label = transforms.randomFlip(img, label)
             img, label = transforms.randomCrop(img, label)
-            img, label = transforms.resize(img, label)
-            print(np.max(label))
-            print(np.min(label))
+            img, label = transforms.resize(img, label, s=224)
+
             if self._transform:
                 return transforms.transform(img, label)
             else:
@@ -126,11 +127,10 @@ class VOC2012ClassSeg(VOCClassSegBase):
 
 
 if __name__ == "__main__":
-    label = PIL.Image.open('../data/label/GF2_PMS2__L1A0001577567-MSS2.tif_3200_1920.png')
 
     batch_size = 4
-    data_path = os.path.expanduser('../data/')
+    data_path = os.path.expanduser('../data/GID-5')
 
-    test_data = VOC2012ClassSeg(root=data_path, split='test', transform=True)
-    test_data.__getitem__(index=1)
+    test_data = VOC2012ClassSeg(root=data_path, split='train', transform=True)
+    test_data.__getitem__(1)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=0)

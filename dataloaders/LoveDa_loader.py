@@ -20,14 +20,15 @@ PALETTE = np.array([[255, 255, 255], [255, 0, 0], [255, 255, 0],
 
 class LoveDaSeg(data.Dataset):
 
-    def __init__(self, root, split='Train', transform=True):
+    def __init__(self, root, split=None, transform=True):
         self.root = root
         self.split = split
         self._transform = transform
         self.floders = ['Rural', 'Urban']
 
         self.files = collections.defaultdict(list)
-        if self.split == 'Train' or 'Val':
+        if self.split == 'Train' or self.split == 'Val':
+
             for floder in self.floders:
                 img_dir = os.path.join(root, split, floder, 'images_png')
                 img_files = os.listdir(img_dir)
@@ -59,12 +60,11 @@ class LoveDaSeg(data.Dataset):
             label = PIL.Image.open(label_file)
             label = np.array(label, dtype=np.uint8)
 
-            fix_label = label.copy()
-
             img, label = transforms.randomFlip(img, label)
             img, label = transforms.randomCrop(img, label)
             img, label = transforms.resize(img, label, s=1024)
 
+            fix_label = label.copy()
             label[fix_label >= 7] = 6
             label[fix_label == 6] = 5
             label[fix_label == 5] = 4
@@ -88,7 +88,6 @@ class LoveDaSeg(data.Dataset):
 if __name__ == "__main__":
     batch_size = 1
     data_path = os.path.expanduser('D:/data/LoveDA/')
-
 
     test_data = LoveDaSeg(root=data_path, split='Train', transform=True)
     # (img, label) = test_data.__getitem__(index=35)

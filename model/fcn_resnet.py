@@ -172,7 +172,7 @@ cfg_resnet = {'resnet18': ['conv1', 'bn1', 'relu', 'maxpool', 'layer1', 'layer2'
 
 class RESNET(nn.Module):
 
-    def __init__(self, pretrained=False, requires_grad=False, remove_fc=True, show_params=False):
+    def __init__(self, pretrained=True, requires_grad=False, remove_fc=True, show_params=False):
         super().__init__()
         if pretrained:
             self.backbone = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
@@ -217,6 +217,6 @@ if __name__ == "__main__":
     # print(resnet)
 
     # summary(resnet, input_size=[(3, 640, 640)], device="cpu")
-    FCN = FCN8s(pretrained_net=resnet, n_class=7, backbone='resnet50')
+    FCN = FCN8s(pretrained_net=resnet, n_class=6, backbone='resnet50')
     # print(FCN)
-    summary(FCN, input_size=[(3, 640, 640)], device="cpu")
+    summary(FCN, input_size=[(3, 1024, 1024)], device="cpu")
