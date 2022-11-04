@@ -4,9 +4,6 @@ import numpy as np
 import PIL.Image
 import torch
 from torch.utils import data
-import cv2
-import random
-from matplotlib import pyplot as plt
 import os
 from Toolkit import transforms
 
@@ -68,8 +65,10 @@ class VOCClassSegBase(data.Dataset):
                     img_file = os.path.join(dataset_dir, 'img', img_name)
                     self.files[split_file].append({'img': img_file})
 
-    # 返回数据集长度
     def __len__(self):
+        '''
+        :return:     return the length of the dataset
+        '''
         return len(self.files[self.split])
 
     def __getitem__(self, index):  # Iterators
@@ -86,14 +85,13 @@ class VOCClassSegBase(data.Dataset):
         if self.split == 'train' or self.split == 'val':
             # load label
             label_file = data_file['label']
-            # label_file = "data/label/GF2_PMS1__L1A0000564539-MSS1.tif_0_3200.png"
-            # print(label_file)
+
             label = PIL.Image.open(label_file)
             label = np.array(label, dtype=np.uint8)
+
+            # Re-label the mask image to [0, 5]
             label = label // 255 * [[[4, 2, 1]]]
             label = np.sum(label, axis=2, dtype=np.uint8)
-            # palette = np.sum((palette // 255 * [[[4, 2, 1]]]), axis=2, dtype=np.uint8).reshape(-1)
-            # print(palette)
             label_index = label.copy()
 
             label[label_index == 7] = 0  # [0, 0, 0]
@@ -126,6 +124,7 @@ class VOC2012ClassSeg(VOCClassSegBase):
             root, split=split, transform=transform)
 
 
+# test with GID dataloader
 if __name__ == "__main__":
 
     batch_size = 4

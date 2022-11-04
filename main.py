@@ -4,34 +4,36 @@ from dataloaders import LoveDa_loader, GID_loader
 from model import fcn_resnet, models, swin, FCNformer
 from train import train, resume, evaluate
 from torch.utils.data import DataLoader
-
+from predict import main as predict
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--exp_id', type=str, default='FCNformer_GID')
+    parser.add_argument('--exp_id', type=str, default='fcn_resnet_LoveDa')
 
-    parser.add_argument('--model', type=str, default='FCNformer',
+    parser.add_argument('--model', type=str, default='fcn_resnet',
                         help='FCNformer & fcn_resnet & fcn_vgg')
 
-    parser.add_argument('--dataset', type=str, default='GID-5',
+    parser.add_argument('--dataset', type=str, default='LoveDa',
                         help='select dataloaders with GID-5, LoveDa etc.')
 
-    parser.add_argument('--data_path', type=str, default='./data/GID-5',
+    parser.add_argument('--data_path', type=str, default='D:/Python/data/LoveDa',
                         help='select dataloaders path with GID, LoveDa etc.')
 
     parser.add_argument('--resume', type=int, default=1,
                         help='resume the trained model')
     parser.add_argument('--test', type=int, default=1,
                         help='test with trained model')
+    parser.add_argument('--predict', type=int, default=1,
+                        help='test with trained model')
 
-    parser.add_argument('--epochs', type=int, default=10,
+    parser.add_argument('--epochs', type=int, default=30,
                         help='number of training epochs')
 
-    parser.add_argument('--batch_size', type=int, default=64)
-    parser.add_argument('--lr', type=float, default=1e-3, help='learning rate')
+    parser.add_argument('--batch_size', type=int, default=4)
+    parser.add_argument('--lr', type=float, default=5e-4, help='learning rate')
 
     parser.add_argument('--loss', type=str, default='Dice loss', help='loss function')
 
@@ -88,7 +90,7 @@ if __name__ == '__main__':
 
     # network
     if args.model == 'fcn_resnet':
-        resnet = fcn_resnet.RESNET(pretrained=True, requires_grad=False).to(device)
+        resnet = fcn_resnet.RESNET(pretrained=True, requires_grad=True).to(device)
         model = fcn_resnet.FCN8s(pretrained_net=resnet, n_class=num_classes, backbone='resnet50').to(device)
 
         print("The FCN ResNet model is defined")
@@ -107,7 +109,8 @@ if __name__ == '__main__':
 
     else:
         model = None
-        NotImplementedError
+        print("Wrong model call")
+        exit()
     # optimizer
     # optimizer = torch.optim.Adam(
     #     model.parameters(), lr=args.lr, betas=(0.9, 0.999))
@@ -117,9 +120,21 @@ if __name__ == '__main__':
     if args.resume:
         model, optimizer = resume(args, model, optimizer)
 
+    if args.predict == 1:
+        if args.dataset == 'LoveDa':
+            test_set = LoveDa_loader.LoveDaSeg(root=args.data_path, split='Test', transform=True)
+        elif args.dataset == 'GID-5':
+            test_set = GID_loader.VOC2012ClassSeg(root=args.data_path, split='predict', transform=True)
+        else:
+            test_set = None
+            print("Wrong dataset call")
+
+        predict(args, model, test_set)
+        print("The output mask image is saved in the output folder.")
+        exit()
+
     if args.test == 1:  # test mode, resume the trained model and test
         evaluate(args, model, val_loader, num_classes)
     else:  # train mode, train the network from scratch
         train(args, model, optimizer, dataloaders, num_classes)
         print('training finished')
-

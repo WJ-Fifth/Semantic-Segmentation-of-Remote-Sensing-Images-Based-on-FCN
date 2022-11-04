@@ -5,20 +5,18 @@ import torch
 from torch.autograd import Variable
 import torch.utils.data.dataloader
 import numpy as np
-import MIoU
 from loss import focal, dice
-import metric
-
+from Toolkit import metric
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
-# arg = parse_args()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# Select the loss function required for training
 loss_dir = {'cross entropy': torch.nn.CrossEntropyLoss(),
             'Focal loss': focal.FocalLoss(),
             'Dice loss': dice.DiceLoss()}
-criterion = loss_dir['Focal loss']
+criterion = loss_dir['Dice loss']
 
 train_loss = []
 val_loss = []
@@ -30,16 +28,18 @@ CLASSES = ('Background', 'Building', 'Road',
            'Water', 'Barren', 'Forest', 'Agricultural')
 
 
-
 def train(args, model, optimizer, dataloaders, num_classes):
+    """
+    :param args: configs
+    :param model: Selected semantic segmentation models
+    :param optimizer: Selected Optimizer, AdamW
+    :param dataloaders: Completed loaded datasets GID-5 or LoveDA
+    :param num_classes: 6 in GID-5 & 7 in LoveDA
+    :return: 'None' just save the checkpoint and Training process.
+    """
     train_loader, val_loader = dataloaders
 
-
-
-    # total_count = torch.tensor([0.0]).to(device)
-    # correct_count = torch.tensor([0.0]).to(device)
     total_loss = torch.tensor([0.0]).to(device)
-    # miou_count = torch.tensor([0.0]).to(device)
 
     best_miou = 0.0
 
@@ -79,7 +79,7 @@ def train(args, model, optimizer, dataloaders, num_classes):
         train_loss.append(total_loss.item())
         acc, miou = evaluate(args, model, val_loader, num_classes)
 
-        print('\nAcc = %.2f' % acc, '% ', 'MIoU = %.2f' % miou, '%')
+        print('\nAcc = %.2f' % acc * 100, '% ', 'MIoU = %.2f' % miou * 100, '%')
 
         if miou > best_miou:
             best_miou = miou
@@ -91,14 +91,13 @@ def train(args, model, optimizer, dataloaders, num_classes):
                 }, './checkpoints/{}_checkpoint.pth'.format(args.exp_id))
             print("The best model is saved!")
 
-
     np.save("./train_loss.npy", train_loss)
     np.save("./val_loss.npy", val_loss)
     np.save("./val_acc.npy", val_acc)
     np.save("./val_miou.npy", val_miou)
     torch.save(
         {
-            'epoch': epoch,
+            'epoch': 30,
             'state_dict': model.state_dict(),
             'optimizer': optimizer.state_dict()
         }, './checkpoints/{}_final_checkpoint.pth'.format(args.exp_id))
@@ -110,6 +109,8 @@ def evaluate(args, model, val_loader, num_classes):
     # correct_count = torch.tensor([0.0]).to(device)
 
     model.eval()
+
+    #
     SegmentationMetric = metric.SegmentationMetric(num_classes)
     SegmentationMetric.reset()
 
@@ -136,11 +137,9 @@ def evaluate(args, model, val_loader, num_classes):
         # Confirm that the obtained loss is a valid value
         assert total_loss is not np.nan  # Determine that the loss ratio is not null
         assert total_loss is not np.inf  # Determine that the loss rate is not infinite
-        
+
         SegmentationMetric.update(preds=out, labels=labels_tensor)
         pixAcc, mIoU, IoU = SegmentationMetric.get()
-        # print(mIoU)
-        # print(len(IoU))
 
         acc += pixAcc
         mean_iu += mIoU
@@ -154,7 +153,7 @@ def evaluate(args, model, val_loader, num_classes):
 
     acc = acc / len(val_loader)
     mean_iu = mean_iu / len(val_loader)
-    class_iou = [x/len(val_loader) for x in class_iou]
+    class_iou = [x / len(val_loader) for x in class_iou]
 
     val_loss.append(total_loss.item())
     val_acc.append(acc)
@@ -164,7 +163,7 @@ def evaluate(args, model, val_loader, num_classes):
     print("MIoU=", mean_iu)
     print("ACC=", acc)
     print(class_iou)
-    # return acc, mean_iu
+    return acc, mean_iu
 
 
 def resume(args, model, optimizer):

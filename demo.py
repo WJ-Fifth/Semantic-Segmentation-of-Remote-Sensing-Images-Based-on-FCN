@@ -78,13 +78,4 @@ def main():
 if __name__ == "__main__":
     class_names = ['other', 'built_up', 'farmland', 'forest', 'meadow', 'water']
 
-    # mean_iu = [69.42,
-    #      85.41,
-    #      78.54,
-    #      70.25,
-    #      6.57,
-    #      6.10]
-    # for i in range(6):
-    #     print('class name: %s' % class_names[i], 'MIoU = %.2f' % mean_iu[i])
-    # print('Total MIoU = : %.2f' % np.mean(mean_iu))
     main()

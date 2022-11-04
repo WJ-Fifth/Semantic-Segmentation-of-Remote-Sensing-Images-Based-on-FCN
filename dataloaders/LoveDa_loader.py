@@ -85,12 +85,12 @@ class LoveDaSeg(data.Dataset):
                 return img
 
 
+# Test about LoveDa loader function
 if __name__ == "__main__":
     batch_size = 1
     data_path = os.path.expanduser('D:/data/LoveDA/')
 
     test_data = LoveDaSeg(root=data_path, split='Train', transform=True)
-    # (img, label) = test_data.__getitem__(index=35)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=0)
 
     for i, (img, label) in enumerate(test_loader):

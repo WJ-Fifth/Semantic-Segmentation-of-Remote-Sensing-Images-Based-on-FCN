@@ -7,7 +7,7 @@ from model import models
 from dataloaders import GID_loader
 from loss import focal
 from torch.optim import Adam
-import MIoU
+from Toolkit import MIoU
 
 CUDA_LAUNCH_BLOCKING = 1
 
@@ -44,7 +44,7 @@ if use_cuda:
     fcn_model.cuda()
 
 # criterion = nn.CrossEntropyLoss()
-criterion = loss.FocalLoss()
+criterion = focal.FocalLoss()
 
 optimizer = Adam(fcn_model.parameters())
 
@@ -114,7 +114,7 @@ def Test(epoch, test_loader):
 if __name__ == '__main__':
     print('data loading....')
 
-    test_data = voc_loader.VOC2012ClassSeg(root=data_path, split='test', transform=True)
+    test_data = GID_loader.VOC2012ClassSeg(root=data_path, split='test', transform=True)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=0)
     print("test data load success")
 

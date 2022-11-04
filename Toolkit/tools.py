@@ -26,7 +26,7 @@ def getPalette():
 def colorize_mask(mask):
     """
     :param mask: The value of the image size, representing the different colors
-    :return:
+    :return: new mask
     """
     new_mask = Image.fromarray(mask.astype(np.uint8), 'P')  # Converting two-dimensional arrays to images
 
@@ -62,24 +62,24 @@ def labelToimg(label):
     label_pil = colorize_mask(label)
     return label_pil
 
-
-def _fast_hist(label_true, label_pred, n_class):
-    mask = (label_true >= 0) & (label_true < n_class)
-    hist = np.bincount(
-        n_class * label_true[mask].astype(int) +
-        label_pred[mask], minlength=n_class ** 2).reshape(n_class, n_class)
-    return hist
-
-
-def accuracy_score(label_trues, label_preds, n_class=6):
-    hist = np.zeros((n_class, n_class))
-    for lt, lp in zip(label_trues, label_preds):
-        hist += _fast_hist(lt.flatten(), lp.flatten(), n_class)  # n_class, n_class
-    acc = np.diag(hist).sum() / hist.sum()
-    acc_cls = np.diag(hist) / hist.sum(axis=1)
-    acc_cls = np.nanmean(acc_cls)
-    iu = np.diag(hist) / (hist.sum(axis=1) + hist.sum(axis=0) - np.diag(hist))
-    mean_iu = np.nanmean(iu)
-    freq = hist.sum(axis=1) / hist.sum()
-    fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
-    return acc, acc_cls, mean_iu, fwavacc
+#
+# def _fast_hist(label_true, label_pred, n_class):
+#     mask = (label_true >= 0) & (label_true < n_class)
+#     hist = np.bincount(
+#         n_class * label_true[mask].astype(int) +
+#         label_pred[mask], minlength=n_class ** 2).reshape(n_class, n_class)
+#     return hist
+#
+#
+# def accuracy_score(label_trues, label_preds, n_class=6):
+#     hist = np.zeros((n_class, n_class))
+#     for lt, lp in zip(label_trues, label_preds):
+#         hist += _fast_hist(lt.flatten(), lp.flatten(), n_class)  # n_class, n_class
+#     acc = np.diag(hist).sum() / hist.sum()
+#     acc_cls = np.diag(hist) / hist.sum(axis=1)
+#     acc_cls = np.nanmean(acc_cls)
+#     iu = np.diag(hist) / (hist.sum(axis=1) + hist.sum(axis=0) - np.diag(hist))
+#     mean_iu = np.nanmean(iu)
+#     freq = hist.sum(axis=1) / hist.sum()
+#     fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
+#     return acc, acc_cls, mean_iu, fwavacc
